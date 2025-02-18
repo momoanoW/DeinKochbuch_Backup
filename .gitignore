@@ -12,7 +12,8 @@ target/
 .idea/libraries/
 *.iws
 *.iml
-*.ipr
+*.iprssh -T git@github.com
+
 
 ### Eclipse ###
 .apt_generated
