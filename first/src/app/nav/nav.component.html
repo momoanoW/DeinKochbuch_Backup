@@ -1,14 +1,16 @@
 <nav class="sticky-top navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">Webtech</a>
+    <a class="navbar-brand" routerLink="">MeinKochbuch</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <a class="nav-link" href="#">Home</a>
-        <a class="nav-link" href="#">Login</a>
-        <a class="nav-link" href="#">About</a>
+        <a class="nav-link" routerLink="" routerLinkActive="myactive" >Home</a>
+        <a class="nav-link" routerLink="login" routerLinkActive="myactive">Login</a>
+        <a class="nav-link" routerLink="myrecipes" routerLinkActive="myactive">My Recipes</a>
+        <a class="nav-link" routerLink="newrecipe" routerLinkActive="myactive">New Recipe</a>
+        <a class="nav-link" routerLink="register" routerLinkActive="myactive">Register</a>
       </div>
     </div>
   </div>
