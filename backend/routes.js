@@ -1,4 +1,5 @@
 const express = require('express');
+const client = require('./db');
 const router = express.Router();
 
 // GET all recipes
@@ -11,6 +12,7 @@ router.get('/rezepte', async(req, res) => {
         res.send(result.rows);
     } catch (err) {
         console.log(err.stack)
+        res.status(500).send('Fehler beim Abrufen der Rezepte');
     }
 });
 
@@ -51,7 +53,13 @@ router.post('/users', async(req, res) => {
 });
 
 // POST one recipe
-router.post('/neuesrezept', async(req, res) => {
+router.post('/newrecipe', async(req, res) => {
+
+    console.log("🚀 routes.js wurde geladen!");
+
+
+    let zutaten = req.body.zutaten ? req.body.zutaten : [];
+
     let name = (req.body.name) ? req.body.name : null;
     let anleitung = (req.body.anleitung) ? req.body.anleitung : null;
     let anzahlportionen = (req.body.anzahlportionen) ? req.body.anzahlportionen : null;
@@ -62,18 +70,34 @@ router.post('/neuesrezept', async(req, res) => {
     let vegetarisch = (req.body.vegetarisch) !== undefined ? req.body.vegetarisch : null;
     let glutenfrei = (req.body.glutenfrei) !== undefined ? req.body.glutenfrei : null;
 
-    const query = `INSERT INTO rezepte(name, anleitung, anzahlportionen, zubereitungszeitmin, erstelltvon, rohkost, vegan, vegetarisch, glutenfrei) 
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`;
+    const rezeptQuery = `INSERT INTO rezepte(name, anleitung, anzahlportionen, zubereitungszeitmin, erstelltvon, rohkost, vegan, vegetarisch, glutenfrei, zutaten) 
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`;
 
     try {
-        const result = await client.query(query, [
+        const result = await client.query(rezeptQuery, [
             name, anleitung, anzahlportionen, zubereitungszeitmin, erstelltvon, rohkost, vegan, vegetarisch, glutenfrei])
-        console.log(result.rows[0]);
-        res.status(201).json(result.rows[0]);
+        const rezeptId = result.rows[0].id;
+        if (zutaten && Array.isArray(zutaten) && zutaten.length > 0) {
+            const beinhaltetQuery = `
+                INSERT INTO beinhaltet (zutaten_id, rezepte_id, menge) VALUES ($1, $2, $3)
+            `;
+
+            for (const zutat of zutaten) {
+                const { zutaten_id, menge } = zutat;
+                await client.query(beinhaltetQuery, [zutaten_id, rezeptId, menge]);
+            }
+        }
+
+        res.status(201).json({ message: "Rezept erfolgreich erstellt!", rezeptId });
+
     } catch (err) {
         console.error(err.stack);
         res.status(500).send('Fehler beim Einfügen des Rezepts');
     }
+});
+
+router.post('/api/test', (req, res) => {
+    res.send("Route funktioniert!");
 });
 
 module.exports = router;
