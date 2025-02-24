@@ -1,10 +1,11 @@
 const express = require('express');
-const client = require('./db');
 const router = express.Router();
+const client = require('./db');
 
-// GET all recipes
+// GET all recipes - hier noch UTF8 Fehler
 router.get('/rezepte', async(req, res) => {
-    const query = `SELECT * FROM rezepte `;
+
+    const query = `SELECT * FROM rezepte`;
 
     try {
         const result = await client.query(query)
@@ -38,8 +39,8 @@ router.get('/rezepte/:id', async (req, res) => {
 
 // POST one user
 router.post('/users', async(req, res) => {
-    let name = (req.body.name) ? req.body.name : null;
-    let passwort = (req.body.passwort) ? req.body.passwort : null;
+    let name = req.body.name || null;
+    let passwort = req.body.passwort || null;
 
     const query = `INSERT INTO users(name, passwort) VALUES ($1, $2) RETURNING *`;
 
@@ -48,55 +49,105 @@ router.post('/users', async(req, res) => {
         console.log(result)
         res.send(result.rows[0]);
     } catch (err) {
-        console.log(err.stack)
+        console.log(err.stack);
+        res.status(500).send("Internal Server Error");
     }
 });
+
 
 // POST one recipe
 router.post('/newrecipe', async(req, res) => {
 
-    console.log("🚀 routes.js wurde geladen!");
 
+    const {
+        name,
+        anleitung,
+        anzahlportionen,
+        zubereitungszeitmin,
+        erstelltvon,
+        rohkost,
+        vegan,
+        vegetarisch,
+        glutenfrei,
+        zutaten // hier ist die verbindung zur tabelle beinhaltet, ein array mit zutaten_id und menge
+    } = req.body;
 
-    let zutaten = req.body.zutaten ? req.body.zutaten : [];
+    const rezeptQuery = `
+        INSERT INTO rezepte(name, anleitung, anzahlportionen, zubereitungszeitmin, erstelltvon, rohkost, vegan, vegetarisch, glutenfrei) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id
+    `;
 
-    let name = (req.body.name) ? req.body.name : null;
-    let anleitung = (req.body.anleitung) ? req.body.anleitung : null;
-    let anzahlportionen = (req.body.anzahlportionen) ? req.body.anzahlportionen : null;
-    let zubereitungszeitmin = (req.body.zubereitungszeitmin) ? req.body.zubereitungszeitmin : null;
-    let erstelltvon = (req.body.erstelltvon) ? req.body.erstelltvon : null;
-    let rohkost = (req.body.rohkost) !== undefined ? req.body.rohkost : null;
-    let vegan = (req.body.vegan) !== undefined ? req.body.vegan : null;
-    let vegetarisch = (req.body.vegetarisch) !== undefined ? req.body.vegetarisch : null;
-    let glutenfrei = (req.body.glutenfrei) !== undefined ? req.body.glutenfrei : null;
-
-    const rezeptQuery = `INSERT INTO rezepte(name, anleitung, anzahlportionen, zubereitungszeitmin, erstelltvon, rohkost, vegan, vegetarisch, glutenfrei, zutaten) 
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`;
+    const beinhaltetQuery = `
+        INSERT INTO beinhaltet (zutaten_id, rezepte_id, menge) VALUES ($1, $2, $3)
+    `;
 
     try {
+        await client.query('BEGIN');
         const result = await client.query(rezeptQuery, [
             name, anleitung, anzahlportionen, zubereitungszeitmin, erstelltvon, rohkost, vegan, vegetarisch, glutenfrei])
         const rezeptId = result.rows[0].id;
-        if (zutaten && Array.isArray(zutaten) && zutaten.length > 0) {
-            const beinhaltetQuery = `
-                INSERT INTO beinhaltet (zutaten_id, rezepte_id, menge) VALUES ($1, $2, $3)
-            `;
+
+        if (Array.isArray(zutaten) && zutaten.length > 0) {
 
             for (const zutat of zutaten) {
                 const { zutaten_id, menge } = zutat;
+
+                // Sicherheits-Check, um zu überprüfen, dass die Zutaten-ID existiert
+                const checkZutat = await client.query('SELECT id FROM zutaten WHERE id = $1', [zutaten_id]);
+                if (checkZutat.rows.length === 0) {
+                    throw new Error(`Zutat mit ID ${zutaten_id} existiert nicht!`);
+                }
+
                 await client.query(beinhaltetQuery, [zutaten_id, rezeptId, menge]);
             }
         }
 
+        await client.query('COMMIT'); // Transaktion abschließen
         res.status(201).json({ message: "Rezept erfolgreich erstellt!", rezeptId });
 
     } catch (err) {
+        await client.query('ROLLBACK'); // Falls ein Fehler passiert, alles zurücksetzen
         console.error(err.stack);
-        res.status(500).send('Fehler beim Einfügen des Rezepts');
+        res.status(500).send(`Fehler beim Einfügen des Rezepts: ${err.message}`);
     }
 });
 
-router.post('/api/test', (req, res) => {
+
+// UPDATE recipe - dynamisch,sodass nur geänderte werte gespeichert werden, aber egal welche werte, sonst brauchen wir mehree update methoden
+
+router.put('/recipe/:id', async (req, res) => {
+    const { id } = req.params;
+    const { anleitung, zutaten } = req.body;
+
+    try {
+        // Falls nur die Anleitung aktualisiert werden soll
+        if (anleitung) {
+            await client.query('UPDATE rezepte SET anleitung = $1 WHERE id = $2', [anleitung, id]);
+        }
+
+        // Falls Zutaten aktualisiert werden sollen
+        if (zutaten && Array.isArray(zutaten)) {
+            for (const zutat of zutaten) {
+                const { zutaten_id, menge } = zutat;
+                await client.query(
+                    'UPDATE beinhaltet SET menge = $1 WHERE rezepte_id = $2 AND zutaten_id = $3',
+                    [menge, id, zutaten_id]
+                );
+            }
+        }
+
+        res.status(200).json({ message: 'Rezept erfolgreich aktualisiert!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Fehler beim Aktualisieren des Rezepts' });
+    }
+});
+
+
+//Test:
+
+router.post('/test', express.json(), (req, res) => {
+    console.log("Test-Route wurde aufgerufen!");
     res.send("Route funktioniert!");
 });
 
