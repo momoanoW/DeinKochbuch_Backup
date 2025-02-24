@@ -2,9 +2,8 @@ const express = require('express');
 const router = express.Router();
 const client = require('./db');
 
-// GET all recipes - hier noch UTF8 Fehler
+// GET all recipes
 router.get('/rezepte', async(req, res) => {
-
     const query = `SELECT * FROM rezepte`;
 
     try {
