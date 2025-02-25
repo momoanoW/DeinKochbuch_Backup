@@ -63,7 +63,7 @@ router.post('/newrecipe', async(req, res) => {
         anleitung,
         anzahlportionen,
         zubereitungszeitmin,
-        erstelltvon,
+        erstelltvon, //ein integer (benutzer id)
         rohkost,
         vegan,
         vegetarisch,
@@ -149,5 +149,67 @@ router.post('/test', express.json(), (req, res) => {
     console.log("Test-Route wurde aufgerufen!");
     res.send("Route funktioniert!");
 });
+
+// DELETE one specific recipe
+router.delete('/rezepte/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // zuerst alle Beziehungen zu Zutaten löschen
+        await client.query('DELETE FROM beinhaltet WHERE rezepte_id = $1', [id]);
+
+        // dann das Rezept selbst löschen
+        await client.query('DELETE FROM rezepte WHERE id = $1', [id]);
+
+        res.status(200).json({ message: 'Rezept erfolgreich gelöscht!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Fehler beim Löschen des Rezepts' });
+    }
+});
+
+// GET one specific user
+router.get('/users/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const query = `SELECT * FROM users WHERE id = $1`;
+        const result = await client.query(query, [id]);
+        if (result.rows.length > 0) {
+            res.send(result.rows[0]);
+        } else {
+            res.status(404).send('Benutzer nicht gefunden');
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Fehler beim Abrufen des Benutzers');
+    }
+});
+
+// UPDATE passwort from one user -- HIER NOCH UTF8 FEHLER
+router.put('/users/:id/password', async (req, res) => {
+    const { id } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+        res.status(400).send('Passwort ist erforderlich');
+        return;
+    }
+
+    try {
+        const query = `UPDATE users SET passwort = $1 WHERE id = $2 RETURNING *`;
+        const result = await client.query(query, [password, id]);
+        if (result.rows.length > 0) {
+            res.send({ message: 'Passwort erfolgreich geändert' });
+        } else {
+            res.status(404).send('Benutzer nicht gefunden');
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Fehler beim Ändern des Passworts');
+    }
+});
+
+
 
 module.exports = router;
