@@ -210,6 +210,4 @@ router.put('/users/:id/password', async (req, res) => {
     }
 });
 
-
-
 module.exports = router;
