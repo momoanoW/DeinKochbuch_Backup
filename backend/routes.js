@@ -57,13 +57,11 @@ router.post('/users', async(req, res) => {
 // POST one recipe
 router.post('/neuesrezept', async(req, res) => {
 
-
     const {
         name,
         anleitung,
         anzahlportionen,
         zubereitungszeitmin,
-        erstelltvon, //ein integer (benutzer*innen id)
         rohkost,
         vegan,
         vegetarisch,
@@ -71,6 +69,18 @@ router.post('/neuesrezept', async(req, res) => {
         zutaten // hier ist die verbindung zur tabelle beinhaltet, ein array mit zutaten_id und menge
     } = req.body;
 
+    const erstelltvon = req.user.id; // Benutzer-ID aus der sitzung
+
+    // Validierung Eingabedaten von user
+    if (!name || !anleitung || !anzahlportionen || !zubereitungszeitmin || !erstelltvon || zutaten === undefined) {
+        return res.status(400).json({ message: "Alle erforderlichen Felder müssen ausgefüllt werden!" });
+    }
+
+    if (anzahlportionen <= 0) {
+        return res.status(400).json({ message: "Anzahl der Portionen muss größer als 0 sein!" });
+    }
+
+    //hier sql an die datenbank
     const rezeptQuery = `
         INSERT INTO rezepte(name, anleitung, anzahlportionen, zubereitungszeitmin, erstelltvon, rohkost, vegan, vegetarisch, glutenfrei) 
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id
@@ -82,14 +92,21 @@ router.post('/neuesrezept', async(req, res) => {
 
     try {
         await client.query('BEGIN');
+
         const result = await client.query(rezeptQuery, [
             name, anleitung, anzahlportionen, zubereitungszeitmin, erstelltvon, rohkost, vegan, vegetarisch, glutenfrei])
-        const rezeptId = result.rows[0].id;
+        const rezeptId = result.rows[0].id; // fur die id des neuen rezepts, zählt weiter
 
+        //überprüfen ob array zutaten gültig ist, muss arraywert über null haben
         if (Array.isArray(zutaten) && zutaten.length > 0) {
 
             for (const zutat of zutaten) {
                 const { zutaten_id, menge } = zutat;
+
+                // Validierung der Zutateneingaben
+                if (!zutaten_id || !menge) {
+                    throw new Error("Interner Fehler (Mengenangabe oder ID der Zutat falsch!");
+                }
 
                 // Sicherheits-Check, um zu überprüfen, dass die Zutaten-ID existiert
                 const checkZutat = await client.query('SELECT id FROM zutaten WHERE id = $1', [zutaten_id]);
