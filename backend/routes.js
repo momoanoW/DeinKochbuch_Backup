@@ -57,13 +57,11 @@ router.post('/users', async(req, res) => {
 // POST one recipe
 router.post('/neuesrezept', async(req, res) => {
 
-
     const {
         name,
         anleitung,
         anzahlportionen,
         zubereitungszeitmin,
-        erstelltvon, //ein integer (benutzer id)
         rohkost,
         vegan,
         vegetarisch,
@@ -71,6 +69,18 @@ router.post('/neuesrezept', async(req, res) => {
         zutaten // hier ist die verbindung zur tabelle beinhaltet, ein array mit zutaten_id und menge
     } = req.body;
 
+    const erstelltvon = req.user.id; // Benutzer-ID aus der sitzung
+
+    // Validierung Eingabedaten von user
+    if (!name || !anleitung || !anzahlportionen || !zubereitungszeitmin || !erstelltvon || zutaten === undefined) {
+        return res.status(400).json({ message: "Alle erforderlichen Felder müssen ausgefüllt werden!" });
+    }
+
+    if (anzahlportionen <= 0) {
+        return res.status(400).json({ message: "Anzahl der Portionen muss größer als 0 sein!" });
+    }
+
+    //hier sql an die datenbank
     const rezeptQuery = `
         INSERT INTO rezepte(name, anleitung, anzahlportionen, zubereitungszeitmin, erstelltvon, rohkost, vegan, vegetarisch, glutenfrei) 
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id
@@ -82,14 +92,21 @@ router.post('/neuesrezept', async(req, res) => {
 
     try {
         await client.query('BEGIN');
+
         const result = await client.query(rezeptQuery, [
             name, anleitung, anzahlportionen, zubereitungszeitmin, erstelltvon, rohkost, vegan, vegetarisch, glutenfrei])
-        const rezeptId = result.rows[0].id;
+        const rezeptId = result.rows[0].id; // fur die id des neuen rezepts, zählt weiter
 
+        //überprüfen ob array zutaten gültig ist, muss arraywert über null haben
         if (Array.isArray(zutaten) && zutaten.length > 0) {
 
             for (const zutat of zutaten) {
                 const { zutaten_id, menge } = zutat;
+
+                // Validierung der Zutateneingaben
+                if (!zutaten_id || !menge) {
+                    throw new Error("Interner Fehler (Mengenangabe oder ID der Zutat falsch!");
+                }
 
                 // Sicherheits-Check, um zu überprüfen, dass die Zutaten-ID existiert
                 const checkZutat = await client.query('SELECT id FROM zutaten WHERE id = $1', [zutaten_id]);
@@ -178,31 +195,31 @@ router.get('/users/:id', async (req, res) => {
         if (result.rows.length > 0) {
             res.send(result.rows[0]);
         } else {
-            res.status(404).send('Benutzer nicht gefunden');
+            res.status(404).send('Benutzer*in nicht gefunden');
         }
     } catch (err) {
         console.error(err);
-        res.status(500).send('Fehler beim Abrufen des Benutzers');
+        res.status(500).send('Fehler beim Abrufen der Benutzer*in');
     }
 });
 
-// UPDATE passwort from one user -- HIER NOCH UTF8 FEHLER
-router.put('/users/:id/password', async (req, res) => {
+// UPDATE passwort from one user
+router.put('/users/:id/passwort', async (req, res) => {
     const { id } = req.params;
-    const { password } = req.body;
+    const { passwort } = req.body;
 
-    if (!password) {
+    if (!passwort) {
         res.status(400).send('Passwort ist erforderlich');
         return;
     }
 
     try {
         const query = `UPDATE users SET passwort = $1 WHERE id = $2 RETURNING *`;
-        const result = await client.query(query, [password, id]);
+        const result = await client.query(query, [passwort, id]);
         if (result.rows.length > 0) {
             res.send({ message: 'Passwort erfolgreich geändert' });
         } else {
-            res.status(404).send('Benutzer nicht gefunden');
+            res.status(404).send('Benutzer*in nicht gefunden');
         }
     } catch (err) {
         console.error(err);
