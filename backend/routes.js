@@ -63,7 +63,7 @@ router.post('/neuesrezept', async(req, res) => {
         anleitung,
         anzahlportionen,
         zubereitungszeitmin,
-        erstelltvon, //ein integer (benutzer id)
+        erstelltvon, //ein integer (benutzer*innen id)
         rohkost,
         vegan,
         vegetarisch,
@@ -178,31 +178,31 @@ router.get('/users/:id', async (req, res) => {
         if (result.rows.length > 0) {
             res.send(result.rows[0]);
         } else {
-            res.status(404).send('Benutzer nicht gefunden');
+            res.status(404).send('Benutzer*in nicht gefunden');
         }
     } catch (err) {
         console.error(err);
-        res.status(500).send('Fehler beim Abrufen des Benutzers');
+        res.status(500).send('Fehler beim Abrufen der Benutzer*in');
     }
 });
 
-// UPDATE passwort from one user -- HIER NOCH UTF8 FEHLER
-router.put('/users/:id/password', async (req, res) => {
+// UPDATE passwort from one user
+router.put('/users/:id/passwort', async (req, res) => {
     const { id } = req.params;
-    const { password } = req.body;
+    const { passwort } = req.body;
 
-    if (!password) {
+    if (!passwort) {
         res.status(400).send('Passwort ist erforderlich');
         return;
     }
 
     try {
         const query = `UPDATE users SET passwort = $1 WHERE id = $2 RETURNING *`;
-        const result = await client.query(query, [password, id]);
+        const result = await client.query(query, [passwort, id]);
         if (result.rows.length > 0) {
             res.send({ message: 'Passwort erfolgreich geändert' });
         } else {
-            res.status(404).send('Benutzer nicht gefunden');
+            res.status(404).send('Benutzer*in nicht gefunden');
         }
     } catch (err) {
         console.error(err);
