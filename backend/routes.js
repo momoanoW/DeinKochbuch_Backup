@@ -55,7 +55,7 @@ router.post('/users', async(req, res) => {
 
 
 // POST one recipe
-router.post('/newrecipe', async(req, res) => {
+router.post('/neuesrezept', async(req, res) => {
 
 
     const {
@@ -114,7 +114,7 @@ router.post('/newrecipe', async(req, res) => {
 
 // UPDATE recipe - dynamisch,sodass nur geänderte werte gespeichert werden, aber egal welche werte, sonst brauchen wir mehree update methoden
 
-router.put('/recipe/:id', async (req, res) => {
+router.put('/rezepte/:id', async (req, res) => {
     const { id } = req.params;
     const { anleitung, zutaten } = req.body;
 
