@@ -12,10 +12,12 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   registerUser(user: User): Observable<any> {
-    return this.http.post(this.baseUrl + '/user/register', user);
+    // Sende nur name und passwort an das Backend
+    const { name, passwort } = user;
+    return this.http.post(this.baseUrl + '/user/register', { name, passwort });
   }
 
-  loginUser(user: { username: string; password: string }): Observable<any> {
+  loginUser(user: { name: string; passwort: string }): Observable<any> {
     return this.http.post(this.baseUrl + '/user/login', user);
   }
 }

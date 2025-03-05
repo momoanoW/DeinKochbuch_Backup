@@ -27,39 +27,35 @@ import { AuthService } from '../shared/auth/auth.service';
 })
 export class RegisterComponent {
   registerForm = new FormGroup({
-    username: new FormControl('', Validators.required),
-    password: new FormControl('', [Validators.required, Validators.minLength(8)]),
-    password2: new FormControl('', [Validators.required, Validators.minLength(8)]),
-    email: new FormControl('', [Validators.required, Validators.email]),
-    role: new FormControl('', Validators.required)
+    name: new FormControl('', Validators.required),
+    passwort: new FormControl('', [Validators.required, Validators.minLength(8)]),
+    passwort2: new FormControl('', [Validators.required, Validators.minLength(8)])
   });
-  roles = [ "admin", "user"];
   hide = true;
   hide2 = true;
   user!: User;
+
 
   constructor(private authService: AuthService) {} // AuthService injiziert
 
   valid(): boolean {
     const check =
-      !this.registerForm.controls['username'].hasError('required') &&
-      !this.registerForm.controls['password'].hasError('required') &&
-      !this.registerForm.controls['password'].hasError('minlength') &&
-      !this.registerForm.controls['password2'].hasError('required') &&
-      !this.registerForm.controls['password2'].hasError('minlength') &&
-      !this.registerForm.controls['email'].hasError('required') &&
-      !this.registerForm.controls['email'].hasError('email') &&
-      this.registerForm.value.password == this.registerForm.value.password2;
+      !this.registerForm.controls['name'].hasError('required') &&
+      !this.registerForm.controls['passwort'].hasError('required') &&
+      !this.registerForm.controls['passwort'].hasError('minlength') &&
+      !this.registerForm.controls['passwort2'].hasError('required') &&
+      !this.registerForm.controls['passwort2'].hasError('minlength')
+      this.registerForm.value.passwort == this.registerForm.value.passwort2;
     console.log('valid : ', check)
     return check;
   }
 
-  differentPassword(): boolean {
-    const check = this.registerForm.dirty && this.registerForm.value.password != this.registerForm.value.password2;
+  differentPasswort(): boolean {
+    const check = this.registerForm.dirty && this.registerForm.value.passwort != this.registerForm.value.passwort2;
     if(check) {
-      this.registerForm.controls.password2.setErrors({'incorrect': true});
+      this.registerForm.controls.passwort2.setErrors({'incorrect': true});
     } else {
-      this.registerForm.controls.password2.setErrors({'incorrect': false});
+      this.registerForm.controls.passwort2.setErrors({'incorrect': false});
     }
     console.log('check : ', check)
     return check;
@@ -68,10 +64,8 @@ export class RegisterComponent {
   onSubmit(): void {
     const values = this.registerForm.value;
     this.user = {
-      username: values.username!,
-      password: values.password!,
-      email: values.email!,
-      role: values.role!
+      name: values.name!,
+      passwort: values.passwort!,
     };
     console.log(this.user)
     if(this.valid()) {

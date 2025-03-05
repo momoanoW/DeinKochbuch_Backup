@@ -1,6 +1,5 @@
 export interface User {
-  username: string;
-  password: string;
-  email: string;
-  role: string;
+  id?: number; // Optional, da es automatisch von der Datenbank generiert wird
+  name: string; // Entspricht dem "Nutzername" Feld
+  passwort: string; // Entspricht dem "Passwort" Feld
 }

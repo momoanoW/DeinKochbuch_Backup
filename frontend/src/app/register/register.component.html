@@ -5,103 +5,66 @@
     </mat-card-header>
     <mat-card-content>
 
+      <!-- Name -->
       <div class="row">
         <div class="col">
           <mat-form-field hintLabel="Einloggen mit Nutzername und Passwort" class="full-width">
-            <input matInput placeholder="Nutzername" formControlName="username">
-            <mat-icon matSuffix >person_add</mat-icon>
-            @if(registerForm.controls['username'].hasError('required')) {
-              <mat-error>
-                Nutzername <strong>erforderlich</strong>
-              </mat-error>
-            }
-          </mat-form-field>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <mat-form-field hintLabel="Mind. 8 Zeichen, mind. 1 Groß- und Kleinbuchstaben, Ziffer und Sonderzeichen" class="full-width">
-            <input matInput [type]="hide ? 'password' : 'text'" placeholder="Passwort" formControlName="password">
-            <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
-              <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
-            </button>
-            @if(registerForm.controls['password'].hasError('required')) {
-              <mat-error>
-                Passwort <strong>erforderlich</strong>
-              </mat-error>
-            } @else if(registerForm.controls['password'].hasError('minlength')) {
-              <mat-error>
-                Passwort muss mind. <strong>8</strong> Zeichen enthalten!
-              </mat-error>
-            }
-          </mat-form-field>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <mat-form-field hintLabel="Dasselbe Passwort wie oben" class="full-width">
-            <input matInput
-                   [class.ng-invalid]="differentPassword()"
-                   [class.ng-valid]="!differentPassword()"
-                   [type]="hide2 ? 'password' : 'text'" placeholder="Passwort wiederholen" formControlName="password2">
-            <button mat-icon-button matSuffix (click)="hide2 = !hide2" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
-              <mat-icon>{{hide2 ? 'visibility_off' : 'visibility'}}</mat-icon>
-            </button>
-            @if(registerForm.controls['password2'].hasError('required')) {
-              <mat-error>
-                Wiederholung Passwort <strong>erforderlich</strong>
-              </mat-error>
-            } @else if(registerForm.controls['password2'].hasError('minlength')) {
-              <mat-error>
-                Passwort muss mind. <strong>8</strong> Zeichen enthalten!
-              </mat-error>
-            } @else if(differentPassword()) {
-              <mat-error>
-                Passwörter nicht identisch!
-              </mat-error>
-            }
+            <input matInput placeholder="Name" formControlName="name">
+            <mat-icon matSuffix>person_add</mat-icon>
+            <!-- Fehleranzeige -->
+            <mat-error *ngIf="registerForm.controls['name'].hasError('required')">
+              Name <strong>erforderlich</strong>
+            </mat-error>
           </mat-form-field>
         </div>
       </div>
 
+      <!-- Passwort -->
       <div class="row">
         <div class="col">
-          <mat-form-field hintLabel="E-Mail-Adresse zum Kontaktieren verwendet" class="full-width">
-            <input matInput placeholder="E-Mail" formControlName="email">
-            <mat-icon matSuffix>email</mat-icon>
-            @if(registerForm.controls['email'].hasError('required')) {
-              <mat-error>
-                E-Mail-Adresse <strong>erforderlich</strong>
-              </mat-error>
-            } @else if(registerForm.controls['email'].hasError('email')) {
-              <mat-error>
-                keine <strong>gültige</strong> E-Mail-Adresse
-              </mat-error>
-            }
+          <mat-form-field hintLabel="Mind. 8 Zeichen, mind. 1 Groß- und Kleinbuchstaben, Ziffer und Sonderzeichen" class="full-width">
+            <input matInput [type]="hide ? 'password' : 'text'" placeholder="Passwort" formControlName="passwort">
+            <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+              <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <!-- Fehleranzeige -->
+            <mat-error *ngIf="registerForm.controls['passwort'].hasError('required')">
+              Passwort <strong>erforderlich</strong>
+            </mat-error>
+            <mat-error *ngIf="registerForm.controls['passwort'].hasError('minlength')">
+              Passwort muss mind. <strong>8</strong> Zeichen enthalten!
+            </mat-error>
           </mat-form-field>
         </div>
       </div>
+
+      <!-- Passwort wiederholen -->
       <div class="row">
         <div class="col">
-          <mat-form-field hintLabel="Wählen Sie eine der beiden Rollen aus" class="full-width">
-            <mat-select placeholder="Rolle" formControlName="role">
-              @for(role of roles; track $index) {
-                <mat-option [value]="role">
-                  {{ role }}
-                </mat-option>
-              }
-            </mat-select>
-            <mat-icon matSuffix>group</mat-icon>
-            @if(registerForm.controls['role'].hasError('required')) {
-              <mat-error>
-                Rolle <strong>erforderlich</strong>
-              </mat-error>
-            }
+          <mat-form-field hintLabel="Das selbe Passwort wie oben" class="full-width">
+            <input matInput
+                   [class.ng-invalid]="differentPasswort()"
+                   [class.ng-valid]="!differentPasswort()"
+                   [type]="hide2 ? 'password' : 'text'" placeholder="Passwort wiederholen" formControlName="passwort2">
+            <button mat-icon-button matSuffix (click)="hide2 = !hide2" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide2">
+              <mat-icon>{{hide2 ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <!-- Fehleranzeige -->
+            <mat-error *ngIf="registerForm.controls['passwort2'].hasError('required')">
+              Wiederholung Passwort <strong>erforderlich</strong>
+            </mat-error>
+            <mat-error *ngIf="registerForm.controls['passwort2'].hasError('minlength')">
+              Passwort muss mind. <strong>8</strong> Zeichen enthalten!
+            </mat-error>
+            <mat-error *ngIf="differentPasswort()">
+              Passwörter nicht identisch!
+            </mat-error>
           </mat-form-field>
         </div>
       </div>
 
     </mat-card-content>
+    <!-- Registrieren Button -->
     <mat-card-actions>
       <button mat-raised-button color="primary" type="submit">Registrieren</button>
     </mat-card-actions>
