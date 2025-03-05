@@ -29,6 +29,10 @@
               <mat-error>
                 Passwort <strong>erforderlich</strong>
               </mat-error>
+            } @else if(registerForm.controls['password'].hasError('minlength')) {
+              <mat-error>
+                Passwort muss mind. <strong>8</strong> Zeichen enthalten!
+              </mat-error>
             }
           </mat-form-field>
         </div>
@@ -36,13 +40,24 @@
       <div class="row">
         <div class="col">
           <mat-form-field hintLabel="Dasselbe Passwort wie oben" class="full-width">
-            <input matInput  [type]="hide2 ? 'password' : 'text'" placeholder="Passwort wiederholen" formControlName="password2">
+            <input matInput
+                   [class.ng-invalid]="differentPassword()"
+                   [class.ng-valid]="!differentPassword()"
+                   [type]="hide2 ? 'password' : 'text'" placeholder="Passwort wiederholen" formControlName="password2">
             <button mat-icon-button matSuffix (click)="hide2 = !hide2" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
               <mat-icon>{{hide2 ? 'visibility_off' : 'visibility'}}</mat-icon>
             </button>
             @if(registerForm.controls['password2'].hasError('required')) {
               <mat-error>
                 Wiederholung Passwort <strong>erforderlich</strong>
+              </mat-error>
+            } @else if(registerForm.controls['password2'].hasError('minlength')) {
+              <mat-error>
+                Passwort muss mind. <strong>8</strong> Zeichen enthalten!
+              </mat-error>
+            } @else if(differentPassword()) {
+              <mat-error>
+                Passwörter nicht identisch!
               </mat-error>
             }
           </mat-form-field>
@@ -57,6 +72,10 @@
             @if(registerForm.controls['email'].hasError('required')) {
               <mat-error>
                 E-Mail-Adresse <strong>erforderlich</strong>
+              </mat-error>
+            } @else if(registerForm.controls['email'].hasError('email')) {
+              <mat-error>
+                keine <strong>gültige</strong> E-Mail-Adresse
               </mat-error>
             }
           </mat-form-field>

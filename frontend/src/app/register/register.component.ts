@@ -40,6 +40,31 @@ export class RegisterComponent {
 
   constructor(private authService: AuthService) {} // AuthService injiziert
 
+  valid(): boolean {
+    const check =
+      !this.registerForm.controls['username'].hasError('required') &&
+      !this.registerForm.controls['password'].hasError('required') &&
+      !this.registerForm.controls['password'].hasError('minlength') &&
+      !this.registerForm.controls['password2'].hasError('required') &&
+      !this.registerForm.controls['password2'].hasError('minlength') &&
+      !this.registerForm.controls['email'].hasError('required') &&
+      !this.registerForm.controls['email'].hasError('email') &&
+      this.registerForm.value.password == this.registerForm.value.password2;
+    console.log('valid : ', check)
+    return check;
+  }
+
+  differentPassword(): boolean {
+    const check = this.registerForm.dirty && this.registerForm.value.password != this.registerForm.value.password2;
+    if(check) {
+      this.registerForm.controls.password2.setErrors({'incorrect': true});
+    } else {
+      this.registerForm.controls.password2.setErrors({'incorrect': false});
+    }
+    console.log('check : ', check)
+    return check;
+  }
+
   onSubmit(): void {
     const values = this.registerForm.value;
     this.user = {
@@ -49,10 +74,16 @@ export class RegisterComponent {
       role: values.role!
     };
     console.log(this.user)
+    if(this.valid()) {
+      console.log('eingaben gueltig! Registrierung wird vorgenommen')
     this.authService.registerUser(this.user).subscribe({
       next: (response) => console.log('response', response),
       error: (err) => console.log('HttpErrorResponse : ', err),
       complete: () => console.log('register completed')
     });
+    } else {
+      console.log('eingaben ungueltig! Registrierung wird abgelehnt')
+    }
+
   }
 }
