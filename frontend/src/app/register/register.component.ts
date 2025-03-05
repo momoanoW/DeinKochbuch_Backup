@@ -1,20 +1,20 @@
-import { Component, inject } from '@angular/core';
-
+import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormControl, FormGroup } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCardModule } from '@angular/material/card';
-import { User } from '../shared/user.component.ts';
+import { User } from '../shared/user';
 import { MatIconModule } from '@angular/material/icon';
-
+import { AuthService } from '../shared/auth/auth.service';
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
   standalone: true,
+  providers: [AuthService],
   imports: [
     MatIconModule,
     MatInputModule,
@@ -38,6 +38,8 @@ export class RegisterComponent {
   hide2 = true;
   user!: User;
 
+  constructor(private authService: AuthService) {} // AuthService injiziert
+
   onSubmit(): void {
     const values = this.registerForm.value;
     this.user = {
@@ -47,5 +49,10 @@ export class RegisterComponent {
       role: values.role!
     };
     console.log(this.user)
+    this.authService.registerUser(this.user).subscribe({
+      next: (response) => console.log('response', response),
+      error: (err) => console.log('HttpErrorResponse : ', err),
+      complete: () => console.log('register completed')
+    });
   }
 }
