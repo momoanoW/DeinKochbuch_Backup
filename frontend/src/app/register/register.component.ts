@@ -43,29 +43,19 @@ export class RegisterComponent {
   hide2 = true;
   user!: User;
 
-
-  constructor(private authService: AuthService, private dialog: MatDialog) {} // AuthService injiziert
-
-  valid(): boolean {
-    const check =
-      !this.registerForm.controls['name'].hasError('required') &&
-      !this.registerForm.controls['passwort'].hasError('required') &&
-      !this.registerForm.controls['passwort'].hasError('minlength') &&
-      !this.registerForm.controls['passwort2'].hasError('required') &&
-      !this.registerForm.controls['passwort2'].hasError('minlength')
-      this.registerForm.value.passwort == this.registerForm.value.passwort2;
-    console.log('valid : ', check)
-    return check;
-  }
+  constructor(
+    private authService: AuthService,
+    private dialog: MatDialog
+  ) {}
 
   differentPasswort(): boolean {
     const check = this.registerForm.dirty && this.registerForm.value.passwort != this.registerForm.value.passwort2;
     if(check) {
       this.registerForm.controls.passwort2.setErrors({'incorrect': true});
     } else {
-      this.registerForm.controls.passwort2.setErrors({'incorrect': false});
+      this.registerForm.controls.passwort2.setErrors(null); // Entferne den Fehler, wenn die Passwörter übereinstimmen
     }
-    console.log('check : ', check)
+    console.log('check : ', check);
     return check;
   }
 
@@ -75,9 +65,9 @@ export class RegisterComponent {
       name: values.name!,
       passwort: values.passwort!,
     };
-    console.log(this.user)
-    if(this.valid()) {
-      console.log('eingaben gueltig! Registrierung wird vorgenommen')
+    console.log(this.user);
+    if (this.registerForm.valid) {
+      console.log('Eingaben gueltig! Registrierung wird vorgenommen');
       this.authService.registerUser(this.user).subscribe({
         next: (response) => {
           console.log('response', response);
@@ -87,14 +77,14 @@ export class RegisterComponent {
           console.log('HttpErrorResponse : ', err);
           this.openDialog({ headline: "Fehler", info: "Nutzername und/oder E-Mail existiert bereits" });
         },
-        complete: () => console.log('register completed')
+        complete: () => console.log('Registrierung abgeschlossen')
       });
-
     } else {
-      console.log('eingaben ungueltig! Registrierung wird abgelehnt')
+      console.log('Eingaben ungueltig! Registrierung wird abgelehnt');
     }
   }
-  openDialog(data: DialogData) {
+
+  openDialog(data: DialogData): void {
     this.dialog.open(ConfirmComponent, {data: data});
   }
 }
