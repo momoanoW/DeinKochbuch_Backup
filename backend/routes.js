@@ -185,7 +185,7 @@ router.delete('/rezepte/:id', async (req, res) => {
     }
 });
 
-// GET one specific user
+// GET one specific user by id
 router.get('/users/:id', async (req, res) => {
     const { id } = req.params;
 
@@ -202,6 +202,8 @@ router.get('/users/:id', async (req, res) => {
         res.status(500).send('Fehler beim Abrufen der Benutzer*in');
     }
 });
+
+
 
 // UPDATE passwort from one user
 router.put('/users/:id/passwort', async (req, res) => {
