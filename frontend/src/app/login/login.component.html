@@ -1,1 +1,46 @@
-<p>login works!</p>
+<form [formGroup]="loginForm" novalidate (ngSubmit)="onSubmit()">
+  <mat-card class="shipping-card">
+    <mat-card-header>
+      <mat-card-title>Registrierung</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+
+      <div class="row">
+        <div class="col">
+          <mat-form-field hintLabel="Einloggen mit Nutzername und Passwort" class="full-width">
+            <input matInput placeholder="Nutzername" formControlName="name">
+            <mat-icon matSuffix >person_add</mat-icon>
+            @if(loginForm.controls['name'].hasError('required')) {
+              <mat-error>
+                Nutzername <strong>erforderlich</strong>
+              </mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <mat-form-field hintLabel="Mind. 8 Zeichen, mind. 1 Groß- und Kleinbuchstaben, Ziffer und Sonderzeichen" class="full-width">
+            <input matInput [type]="hide ? 'passwort' : 'text'" placeholder="Passwort" formControlName="passwort">
+            <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide passwort'" [attr.aria-pressed]="hide">
+              <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            @if(loginForm.controls['passwort'].hasError('required')) {
+              <mat-error>
+                Passwort <strong>erforderlich</strong>
+              </mat-error>
+            } @else if(loginForm.controls['passwort'].hasError('minlength')) {
+              <mat-error>
+                Passwort muss mind. <strong>8</strong> Zeichen enthalten!
+              </mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!valid()!">Login</button>
+    </mat-card-actions>
+  </mat-card>
+</form>

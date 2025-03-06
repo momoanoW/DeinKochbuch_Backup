@@ -1,0 +1,35 @@
+.full-width {
+  width: 100%;
+}
+
+.shipping-card {
+  width: clamp(240px, 80vw, min(80vw, 1200px));
+  margin: 2% 2% auto 2%;
+}
+
+.mat-radio-button {
+  display: block;
+  margin: 5px 0;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 2%;
+}
+
+.col {
+  flex: 1;
+  margin-right: 20px;
+}
+.mat-mdc-card-header {
+  margin-bottom: 2%;
+}
+
+.mat-mdc-card-actions {
+  margin-top: 2%;
+}
+
+.col:last-child {
+  margin-right: 0;
+}

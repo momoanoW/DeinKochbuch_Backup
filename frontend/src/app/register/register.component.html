@@ -1,99 +1,72 @@
-<form [formGroup]="addressForm" novalidate (ngSubmit)="onSubmit()">
+<form [formGroup]="registerForm" novalidate (ngSubmit)="onSubmit()">
   <mat-card class="shipping-card">
     <mat-card-header>
-      <mat-card-title>Shipping Information</mat-card-title>
+      <mat-card-title>Registrierung</mat-card-title>
     </mat-card-header>
     <mat-card-content>
+
+      <!-- Name -->
       <div class="row">
         <div class="col">
-          <mat-form-field class="full-width">
-            <input matInput placeholder="Company" formControlName="company">
+          <mat-form-field hintLabel="Einloggen mit Nutzername und Passwort" class="full-width">
+            <input matInput placeholder="Name" formControlName="name">
+            <mat-icon matSuffix>person_add</mat-icon>
+            <!-- Fehleranzeige -->
+            <mat-error *ngIf="registerForm.controls['name'].hasError('required')">
+              Name <strong>erforderlich</strong>
+            </mat-error>
           </mat-form-field>
         </div>
       </div>
+
+      <!-- Passwort -->
       <div class="row">
         <div class="col">
-          <mat-form-field class="full-width">
-            <input matInput placeholder="First name" formControlName="firstName">
-            @if (addressForm.controls['firstName'].hasError('required')) {
-              <mat-error>First name is <strong>required</strong></mat-error>
-            }
-          </mat-form-field>
-        </div>
-        <div class="col">
-          <mat-form-field class="full-width">
-            <input matInput placeholder="Last name" formControlName="lastName">
-            @if (addressForm.controls['lastName'].hasError('required')) {
-              <mat-error>Last name is <strong>required</strong></mat-error>
-            }
-          </mat-form-field>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <mat-form-field class="full-width">
-            <textarea matInput placeholder="Address" formControlName="address"></textarea>
-            @if (addressForm.controls['address'].hasError('required')) {
-              <mat-error>Address is <strong>required</strong></mat-error>
-            }
-          </mat-form-field>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          @if (hasUnitNumber) {
-            <mat-form-field class="full-width">
-              <textarea matInput placeholder="Address 2" formControlName="address2"></textarea>
-            </mat-form-field>
-          } @else {
-            <button mat-button type="button" (click)="hasUnitNumber = !hasUnitNumber">
-              + Add C/O, Apt, Suite, Unit
+          <mat-form-field hintLabel="Mind. 8 Zeichen, mind. 1 Groß- und Kleinbuchstaben, Ziffer und Sonderzeichen" class="full-width">
+            <input matInput [type]="hide ? 'password' : 'text'" placeholder="Passwort" formControlName="passwort">
+            <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+              <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
             </button>
-          }
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <mat-form-field class="full-width">
-            <input matInput placeholder="City" formControlName="city">
-            @if (addressForm.controls['city'].hasError('required')) {
-              <mat-error>City is <strong>required</strong></mat-error>
-            }
-          </mat-form-field>
-        </div>
-        <div class="col">
-          <mat-form-field class="full-width">
-            <mat-select placeholder="State" formControlName="state">
-              @for (state of states; track state) {
-                <mat-option [value]="state.abbreviation">{{ state.name }}</mat-option>
-              }
-            </mat-select>
-            @if (addressForm.controls['state'].hasError('required')) {
-              <mat-error>State is <strong>required</strong></mat-error>
-            }
+            <!-- Fehleranzeige -->
+            <mat-error *ngIf="registerForm.controls['passwort'].hasError('required')">
+              Passwort <strong>erforderlich</strong>
+            </mat-error>
+            <mat-error *ngIf="registerForm.controls['passwort'].hasError('minlength')">
+              Passwort muss mind. <strong>8</strong> Zeichen enthalten!
+            </mat-error>
           </mat-form-field>
         </div>
       </div>
+
+      <!-- Passwort wiederholen -->
       <div class="row">
         <div class="col">
-          <mat-form-field class="full-width">
-            <input matInput #postalCode maxlength="5" placeholder="Postal Code" type="number" formControlName="postalCode">
-            <mat-hint align="end">{{postalCode.value.length}} / 5</mat-hint>
+          <mat-form-field hintLabel="Das selbe Passwort wie oben" class="full-width">
+            <input matInput
+                   [class.ng-invalid]="differentPasswort()"
+                   [class.ng-valid]="!differentPasswort()"
+                   [type]="hide2 ? 'password' : 'text'" placeholder="Passwort wiederholen" formControlName="passwort2">
+            <button mat-icon-button matSuffix (click)="hide2 = !hide2" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide2">
+              <mat-icon>{{hide2 ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <!-- Fehleranzeige -->
+            <mat-error *ngIf="registerForm.controls['passwort2'].hasError('required')">
+              Wiederholung Passwort <strong>erforderlich</strong>
+            </mat-error>
+            <mat-error *ngIf="registerForm.controls['passwort2'].hasError('minlength')">
+              Passwort muss mind. <strong>8</strong> Zeichen enthalten!
+            </mat-error>
+            <mat-error *ngIf="differentPasswort()">
+              Passwörter nicht identisch!
+            </mat-error>
           </mat-form-field>
         </div>
       </div>
-      <div class="row">
-        <div class="col">
-          <mat-radio-group formControlName="shipping">
-            <mat-radio-button value="free">Free Shipping</mat-radio-button>
-            <mat-radio-button value="priority">Priority Shipping</mat-radio-button>
-            <mat-radio-button value="nextday">Next Day Shipping</mat-radio-button>
-          </mat-radio-group>
-        </div>
-      </div>
+
     </mat-card-content>
+    <!-- Registrieren Button -->
     <mat-card-actions>
-      <button mat-raised-button color="primary" type="submit">Submit</button>
+      <button mat-raised-button color="primary" type="submit">Registrieren</button>
     </mat-card-actions>
   </mat-card>
 </form>

@@ -1,108 +1,90 @@
-import { Component, inject } from '@angular/core';
-
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Component } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, Validators, FormControl, FormGroup } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCardModule } from '@angular/material/card';
+import { User } from '../shared/user';
+import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '../shared/auth/auth.service';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmComponent } from './confirm/confirm.component';
 
+export interface DialogData {
+  headline: string;
+  info: string;
+}
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
   standalone: true,
+  providers: [AuthService],
   imports: [
+    MatIconModule,
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
     MatRadioModule,
     MatCardModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatDialogModule
   ]
 })
 export class RegisterComponent {
-  private fb = inject(FormBuilder);
-  addressForm = this.fb.group({
-    company: null,
-    firstName: [null, Validators.required],
-    lastName: [null, Validators.required],
-    address: [null, Validators.required],
-    address2: null,
-    city: [null, Validators.required],
-    state: [null, Validators.required],
-    postalCode: [null, Validators.compose([
-      Validators.required, Validators.minLength(5), Validators.maxLength(5)])
-    ],
-    shipping: ['free', Validators.required]
+  registerForm = new FormGroup({
+    name: new FormControl('', Validators.required),
+    passwort: new FormControl('', [Validators.required, Validators.minLength(8)]),
+    passwort2: new FormControl('', [Validators.required, Validators.minLength(8)])
   });
+  hide = true;
+  hide2 = true;
+  user!: User;
 
-  hasUnitNumber = false;
+  constructor(
+    private authService: AuthService,
+    private dialog: MatDialog
+  ) {}
 
-  states = [
-    {name: 'Alabama', abbreviation: 'AL'},
-    {name: 'Alaska', abbreviation: 'AK'},
-    {name: 'American Samoa', abbreviation: 'AS'},
-    {name: 'Arizona', abbreviation: 'AZ'},
-    {name: 'Arkansas', abbreviation: 'AR'},
-    {name: 'California', abbreviation: 'CA'},
-    {name: 'Colorado', abbreviation: 'CO'},
-    {name: 'Connecticut', abbreviation: 'CT'},
-    {name: 'Delaware', abbreviation: 'DE'},
-    {name: 'District Of Columbia', abbreviation: 'DC'},
-    {name: 'Federated States Of Micronesia', abbreviation: 'FM'},
-    {name: 'Florida', abbreviation: 'FL'},
-    {name: 'Georgia', abbreviation: 'GA'},
-    {name: 'Guam', abbreviation: 'GU'},
-    {name: 'Hawaii', abbreviation: 'HI'},
-    {name: 'Idaho', abbreviation: 'ID'},
-    {name: 'Illinois', abbreviation: 'IL'},
-    {name: 'Indiana', abbreviation: 'IN'},
-    {name: 'Iowa', abbreviation: 'IA'},
-    {name: 'Kansas', abbreviation: 'KS'},
-    {name: 'Kentucky', abbreviation: 'KY'},
-    {name: 'Louisiana', abbreviation: 'LA'},
-    {name: 'Maine', abbreviation: 'ME'},
-    {name: 'Marshall Islands', abbreviation: 'MH'},
-    {name: 'Maryland', abbreviation: 'MD'},
-    {name: 'Massachusetts', abbreviation: 'MA'},
-    {name: 'Michigan', abbreviation: 'MI'},
-    {name: 'Minnesota', abbreviation: 'MN'},
-    {name: 'Mississippi', abbreviation: 'MS'},
-    {name: 'Missouri', abbreviation: 'MO'},
-    {name: 'Montana', abbreviation: 'MT'},
-    {name: 'Nebraska', abbreviation: 'NE'},
-    {name: 'Nevada', abbreviation: 'NV'},
-    {name: 'New Hampshire', abbreviation: 'NH'},
-    {name: 'New Jersey', abbreviation: 'NJ'},
-    {name: 'New Mexico', abbreviation: 'NM'},
-    {name: 'New York', abbreviation: 'NY'},
-    {name: 'North Carolina', abbreviation: 'NC'},
-    {name: 'North Dakota', abbreviation: 'ND'},
-    {name: 'Northern Mariana Islands', abbreviation: 'MP'},
-    {name: 'Ohio', abbreviation: 'OH'},
-    {name: 'Oklahoma', abbreviation: 'OK'},
-    {name: 'Oregon', abbreviation: 'OR'},
-    {name: 'Palau', abbreviation: 'PW'},
-    {name: 'Pennsylvania', abbreviation: 'PA'},
-    {name: 'Puerto Rico', abbreviation: 'PR'},
-    {name: 'Rhode Island', abbreviation: 'RI'},
-    {name: 'South Carolina', abbreviation: 'SC'},
-    {name: 'South Dakota', abbreviation: 'SD'},
-    {name: 'Tennessee', abbreviation: 'TN'},
-    {name: 'Texas', abbreviation: 'TX'},
-    {name: 'Utah', abbreviation: 'UT'},
-    {name: 'Vermont', abbreviation: 'VT'},
-    {name: 'Virgin Islands', abbreviation: 'VI'},
-    {name: 'Virginia', abbreviation: 'VA'},
-    {name: 'Washington', abbreviation: 'WA'},
-    {name: 'West Virginia', abbreviation: 'WV'},
-    {name: 'Wisconsin', abbreviation: 'WI'},
-    {name: 'Wyoming', abbreviation: 'WY'}
-  ];
+  differentPasswort(): boolean {
+    const check = this.registerForm.dirty && this.registerForm.value.passwort != this.registerForm.value.passwort2;
+    if(check) {
+      this.registerForm.controls.passwort2.setErrors({'incorrect': true});
+    } else {
+      this.registerForm.controls.passwort2.setErrors(null); // Entferne den Fehler, wenn die Passwörter übereinstimmen
+    }
+    console.log('check : ', check);
+    return check;
+  }
 
   onSubmit(): void {
-    alert('Thanks!');
+    const values = this.registerForm.value;
+    this.user = {
+      name: values.name!,
+      passwort: values.passwort!,
+    };
+    console.log(this.user);
+    if (this.registerForm.valid) {
+      console.log('Eingaben gueltig! Registrierung wird vorgenommen');
+      this.authService.registerUser(this.user).subscribe({
+        next: (response) => {
+          console.log('response', response);
+          this.openDialog({ headline: "Erfolg", info: "User " + response.name + " registriert!" });
+        },
+        error: (err) => {
+          console.log('HttpErrorResponse : ', err);
+          this.openDialog({ headline: "Fehler", info: "Nutzername und/oder E-Mail existiert bereits" });
+        },
+        complete: () => console.log('Registrierung abgeschlossen')
+      });
+    } else {
+      console.log('Eingaben ungueltig! Registrierung wird abgelehnt');
+    }
+  }
+
+  openDialog(data: DialogData): void {
+    this.dialog.open(ConfirmComponent, {data: data});
   }
 }
