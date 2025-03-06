@@ -8,6 +8,13 @@ import { MatCardModule } from '@angular/material/card';
 import { User } from '../shared/user';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../shared/auth/auth.service';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmComponent } from './confirm/confirm.component';
+
+export interface DialogData {
+  headline: string;
+  info: string;
+}
 
 @Component({
   selector: 'app-register',
@@ -22,7 +29,8 @@ import { AuthService } from '../shared/auth/auth.service';
     MatSelectModule,
     MatRadioModule,
     MatCardModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatDialogModule
   ]
 })
 export class RegisterComponent {
@@ -36,7 +44,7 @@ export class RegisterComponent {
   user!: User;
 
 
-  constructor(private authService: AuthService) {} // AuthService injiziert
+  constructor(private authService: AuthService, private dialog: MatDialog) {} // AuthService injiziert
 
   valid(): boolean {
     const check =
@@ -70,14 +78,23 @@ export class RegisterComponent {
     console.log(this.user)
     if(this.valid()) {
       console.log('eingaben gueltig! Registrierung wird vorgenommen')
-    this.authService.registerUser(this.user).subscribe({
-      next: (response) => console.log('response', response),
-      error: (err) => console.log('HttpErrorResponse : ', err),
-      complete: () => console.log('register completed')
-    });
+      this.authService.registerUser(this.user).subscribe({
+        next: (response) => {
+          console.log('response', response);
+          this.openDialog({ headline: "Erfolg", info: "User " + response.name + " registriert!" });
+        },
+        error: (err) => {
+          console.log('HttpErrorResponse : ', err);
+          this.openDialog({ headline: "Fehler", info: "Nutzername und/oder E-Mail existiert bereits" });
+        },
+        complete: () => console.log('register completed')
+      });
+
     } else {
       console.log('eingaben ungueltig! Registrierung wird abgelehnt')
     }
-
+  }
+  openDialog(data: DialogData) {
+    this.dialog.open(ConfirmComponent, {data: data});
   }
 }
