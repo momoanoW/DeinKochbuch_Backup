@@ -21,11 +21,11 @@
       <div class="row">
         <div class="col">
           <mat-form-field hintLabel="Mind. 8 Zeichen, mind. 1 Groß- und Kleinbuchstaben, Ziffer und Sonderzeichen" class="full-width">
-            <input matInput [type]="hide ? 'passwort' : 'text'" placeholder="Passwort" formControlName="passwort">
-            <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide passwort'" [attr.aria-pressed]="hide">
+            <input matInput [type]="hide ? 'password' : 'text'" placeholder="Passwort" formControlName="passwort">
+            <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
               <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
             </button>
-            @if(loginForm.controls['passwort'].hasError('required')) {
+          @if(loginForm.controls['passwort'].hasError('required')) {
               <mat-error>
                 Passwort <strong>erforderlich</strong>
               </mat-error>
@@ -45,3 +45,8 @@
     </mat-card-actions>
   </mat-card>
 </form>
+
+<div *ngIf="loginMessage" [ngClass]="{'success': loginMessage === 'Login erfolgreich', 'error': loginMessage !== 'Login erfolgreich'}">
+  {{ loginMessage }}
+</div>
+
