@@ -9,7 +9,7 @@
       <div class="row">
         <div class="col">
           <mat-form-field hintLabel="Einloggen mit Nutzername und Passwort" class="full-width">
-            <input matInput placeholder="Name" formControlName="name">
+            <input matInput placeholder="Name" formControlName="name" autocomplete="off">
             <mat-icon matSuffix>person_add</mat-icon>
             <!-- Fehleranzeige -->
             <mat-error *ngIf="registerForm.controls['name'].hasError('required')">
@@ -23,7 +23,7 @@
       <div class="row">
         <div class="col">
           <mat-form-field hintLabel="Mind. 8 Zeichen, mind. 1 Groß- und Kleinbuchstaben, Ziffer und Sonderzeichen" class="full-width">
-            <input matInput [type]="hide ? 'password' : 'text'" placeholder="Passwort" formControlName="passwort">
+            <input matInput [type]="hide ? 'password' : 'text'" placeholder="Passwort" formControlName="passwort" autocomplete="new-password">
             <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
               <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
             </button>
@@ -43,9 +43,7 @@
         <div class="col">
           <mat-form-field hintLabel="Das selbe Passwort wie oben" class="full-width">
             <input matInput
-                   [class.ng-invalid]="differentPasswort()"
-                   [class.ng-valid]="!differentPasswort()"
-                   [type]="hide2 ? 'password' : 'text'" placeholder="Passwort wiederholen" formControlName="passwort2">
+                   [type]="hide2 ? 'passwort' : 'text'" placeholder="Passwort wiederholen" formControlName="passwort2" autocomplete="new-password">
             <button mat-icon-button matSuffix (click)="hide2 = !hide2" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide2">
               <mat-icon>{{hide2 ? 'visibility_off' : 'visibility'}}</mat-icon>
             </button>
@@ -56,8 +54,8 @@
             <mat-error *ngIf="registerForm.controls['passwort2'].hasError('minlength')">
               Passwort muss mind. <strong>8</strong> Zeichen enthalten!
             </mat-error>
-            <mat-error *ngIf="differentPasswort()">
-              Passwörter nicht identisch!
+            <mat-error *ngIf="registerForm.hasError('passwordsNotMatching')">
+              Passwörter stimmen nicht überein!
             </mat-error>
           </mat-form-field>
         </div>
@@ -66,7 +64,7 @@
     </mat-card-content>
     <!-- Registrieren Button -->
     <mat-card-actions>
-      <button mat-raised-button color="primary" type="submit">Registrieren</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!registerForm.valid">Registrieren</button>
     </mat-card-actions>
   </mat-card>
 </form>

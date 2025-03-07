@@ -6,7 +6,8 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../shared/auth/auth.service';
-
+import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
@@ -18,6 +19,8 @@ import { AuthService } from '../shared/auth/auth.service';
     MatRadioModule,
     MatCardModule,
     ReactiveFormsModule,
+    RouterModule,
+    CommonModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
@@ -29,9 +32,15 @@ export class LoginComponent {
     passwort: new FormControl('', [Validators.required, Validators.minLength(8)]),
   });
   hide = true;
+  loginMessage: string = '';
 
   private auth = inject(AuthService);
 
+  togglePasswordVisibility(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.hide = !this.hide;
+  }
 
   onSubmit(): void {
     const values = this.loginForm.value;
@@ -44,19 +53,20 @@ export class LoginComponent {
       this.auth.loginUser(user).subscribe({
         next: (response) => {
           console.log('user logged in ', response);
-          this.auth.setUser(response.token, response.user)
+          this.auth.setUser(response.token, response.user);
+          this.loginMessage = 'Login erfolgreich'; // Setze die Erfolgsmeldung
         },
         error: (err) => {
           console.log('login error', err);
+          this.loginMessage = 'Login fehlgeschlagen: ' + (err.error?.message || 'Unbekannter Fehler'); // Setze die Fehlermeldung
         },
         complete: () => console.log('login completed')
       });
     } else {
       console.log('Form is invalid');
+      this.loginMessage = 'Bitte füllen Sie alle Felder korrekt aus.';
     }
-
   }
-
 
   valid(): boolean {
     const check =

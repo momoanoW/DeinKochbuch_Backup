@@ -1,7 +1,7 @@
 <form [formGroup]="loginForm" novalidate (ngSubmit)="onSubmit()">
   <mat-card class="shipping-card">
     <mat-card-header>
-      <mat-card-title>Registrierung</mat-card-title>
+      <mat-card-title>Login</mat-card-title>
     </mat-card-header>
     <mat-card-content>
 
@@ -21,8 +21,8 @@
       <div class="row">
         <div class="col">
           <mat-form-field hintLabel="Mind. 8 Zeichen, mind. 1 Groß- und Kleinbuchstaben, Ziffer und Sonderzeichen" class="full-width">
-            <input matInput [type]="hide ? 'passwort' : 'text'" placeholder="Passwort" formControlName="passwort">
-            <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide passwort'" [attr.aria-pressed]="hide">
+            <input matInput [type]="hide ? 'password' : 'text'" placeholder="Passwort" formControlName="passwort">
+            <button type="button" mat-icon-button matSuffix (click)="togglePasswordVisibility($event)" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
               <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
             </button>
             @if(loginForm.controls['passwort'].hasError('required')) {
@@ -41,6 +41,12 @@
     </mat-card-content>
     <mat-card-actions>
       <button mat-raised-button color="primary" type="submit" [disabled]="!valid()!">Login</button>
+      <p>Noch kein Konto?  <button mat-raised-button  routerLink="/register">Registrieren</button></p>
     </mat-card-actions>
   </mat-card>
 </form>
+
+<div *ngIf="loginMessage" [ngClass]="{'success': loginMessage === 'Login erfolgreich', 'error': loginMessage !== 'Login erfolgreich'}">
+  {{ loginMessage }}
+</div>
+
