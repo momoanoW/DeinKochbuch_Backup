@@ -229,4 +229,29 @@ router.put('/users/:id/passwort', async (req, res) => {
     }
 });
 
+// POST login route
+router.post('/user/login', async (req, res) => {
+    const { name, passwort } = req.body;
+
+    try {
+        const userQuery = 'SELECT * FROM users WHERE name = $1 AND passwort = $2';
+        const result = await client.query(userQuery, [name, passwort]);
+
+        if (result.rows.length === 0) {
+            return res.status(401).json({ message: 'Ungültige Anmeldeinformationen' });
+        }
+
+        const user = result.rows[0];
+
+        res.json({
+            message: 'Login erfolgreich',
+            userId: user.id,
+            name: user.name
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Serverfehler beim Login' });
+    }
+});
+
 module.exports = router;
