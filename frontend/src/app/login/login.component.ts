@@ -36,7 +36,9 @@ export class LoginComponent {
 
   private auth = inject(AuthService);
 
-  togglePasswordVisibility() {
+  togglePasswordVisibility(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
     this.hide = !this.hide;
   }
 

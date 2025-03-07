@@ -22,10 +22,10 @@
         <div class="col">
           <mat-form-field hintLabel="Mind. 8 Zeichen, mind. 1 Groß- und Kleinbuchstaben, Ziffer und Sonderzeichen" class="full-width">
             <input matInput [type]="hide ? 'password' : 'text'" placeholder="Passwort" formControlName="passwort">
-            <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+            <button type="button" mat-icon-button matSuffix (click)="togglePasswordVisibility($event)" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
               <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
             </button>
-          @if(loginForm.controls['passwort'].hasError('required')) {
+            @if(loginForm.controls['passwort'].hasError('required')) {
               <mat-error>
                 Passwort <strong>erforderlich</strong>
               </mat-error>
