@@ -36,22 +36,43 @@ router.get('/rezepte/:id', async (req, res) => {
     }
 });
 
-// POST one user
+// POST register new user
 router.post('/users', async(req, res) => {
-    let name = req.body.name || null;
-    let passwort = req.body.passwort || null;
+    let { name, passwort } = req.body;
+    console.log('Registrierungsversuch für:', name); // Logging
 
-    const query = `INSERT INTO users(name, passwort) VALUES ($1, $2) RETURNING *`;
+    if (!name || !passwort) {
+        console.log('Fehlende Eingaben'); // Logging
+        return res.status(400).json({ message: "Benutzername und Passwort sind erforderlich" });
+    }
+
+    // Überprüfe Passwortanforderungen
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(passwort)) {
+        return res.status(400).json({ message: "Passwort muss mindestens 8 Zeichen lang sein und mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Ziffer und ein Sonderzeichen enthalten" });
+    }
 
     try {
-        const result = await client.query(query, [name, passwort])
-        console.log(result)
-        res.send(result.rows[0]);
+        // Überprüfe, ob der Benutzer bereits existiert
+        const userCheck = await client.query('SELECT * FROM users WHERE name = $1', [name]);
+        if (userCheck.rows.length > 0) {
+            return res.status(400).json({ message: 'Benutzername bereits vergeben' });
+        }
+
+        // Füge den neuen Benutzer hinzu
+        const query = `INSERT INTO users(name, passwort) VALUES ($1, $2) RETURNING id, name`;
+        const result = await client.query(query, [name, passwort]);
+
+        res.status(201).json({
+            message: "Benutzer erfolgreich registriert",
+            user: { id: result.rows[0].id, name: result.rows[0].name }
+        });
     } catch (err) {
         console.log(err.stack);
-        res.status(500).send("Internal Server Error");
+        res.status(500).json({ message: "Fehler bei der Registrierung" });
     }
 });
+
 
 
 // POST one recipe
