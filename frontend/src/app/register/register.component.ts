@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators, FormControl, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
@@ -49,7 +49,14 @@ export class RegisterComponent {
   ) {}
 
   differentPasswort(): boolean {
-    const check = this.registerForm.dirty && this.registerForm.value.passwort != this.registerForm.value.passwort2;
+    const passwortControl = this.registerForm.get('passwort');
+    const passwort2Control = this.registerForm.get('passwort2');
+
+    if (!passwortControl || !passwort2Control) {
+      return false;
+    }
+
+    const check = this.registerForm.dirty && passwortControl.value != passwort2Control.value;
     if(check) {
       this.registerForm.controls.passwort2.setErrors({'incorrect': true});
     } else {
@@ -75,7 +82,7 @@ export class RegisterComponent {
         },
         error: (err) => {
           console.log('HttpErrorResponse : ', err);
-          this.openDialog({ headline: "Fehler", info: "Nutzername und/oder E-Mail existiert bereits" });
+          this.openDialog({ headline: "Fehler", info: "Nutzername existiert bereits" });
         },
         complete: () => console.log('Registrierung abgeschlossen')
       });

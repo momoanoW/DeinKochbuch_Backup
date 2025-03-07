@@ -6,6 +6,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../shared/auth/auth.service';
+import { RouterModule } from '@angular/router';
 
 
 @Component({
@@ -18,6 +19,7 @@ import { AuthService } from '../shared/auth/auth.service';
     MatRadioModule,
     MatCardModule,
     ReactiveFormsModule,
+    RouterModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
