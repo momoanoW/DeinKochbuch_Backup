@@ -10,6 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../shared/auth/auth.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmComponent } from './confirm/confirm.component';
+import { CommonModule } from '@angular/common';
+import { passwortMatchValidator } from '../shared/validators/passwort-match/passwort-match.validator'; // Import des Validators
 
 export interface DialogData {
   headline: string;
@@ -23,6 +25,7 @@ export interface DialogData {
   standalone: true,
   providers: [AuthService],
   imports: [
+    CommonModule,
     MatIconModule,
     MatInputModule,
     MatButtonModule,
@@ -34,11 +37,14 @@ export interface DialogData {
   ]
 })
 export class RegisterComponent {
-  registerForm = new FormGroup({
-    name: new FormControl('', Validators.required),
-    passwort: new FormControl('', [Validators.required, Validators.minLength(8)]),
-    passwort2: new FormControl('', [Validators.required, Validators.minLength(8)])
-  });
+  registerForm = new FormGroup(
+    {
+      name: new FormControl('', Validators.required),
+      passwort: new FormControl('', [Validators.required, Validators.minLength(8)]),
+      passwort2: new FormControl('', [Validators.required, Validators.minLength(8)])
+    },
+    { validators: passwortMatchValidator } // Benutzerdefinierter Validator wird hier hinzugefügt
+  );
   hide = true;
   hide2 = true;
   user!: User;
@@ -47,24 +53,6 @@ export class RegisterComponent {
     private authService: AuthService,
     private dialog: MatDialog
   ) {}
-
-  differentPasswort(): boolean {
-    const passwortControl = this.registerForm.get('passwort');
-    const passwort2Control = this.registerForm.get('passwort2');
-
-    if (!passwortControl || !passwort2Control) {
-      return false;
-    }
-
-    const check = this.registerForm.dirty && passwortControl.value != passwort2Control.value;
-    if(check) {
-      this.registerForm.controls.passwort2.setErrors({'incorrect': true});
-    } else {
-      this.registerForm.controls.passwort2.setErrors(null); // Entferne den Fehler, wenn die Passwörter übereinstimmen
-    }
-    console.log('check : ', check);
-    return check;
-  }
 
   onSubmit(): void {
     const values = this.registerForm.value;
@@ -92,6 +80,6 @@ export class RegisterComponent {
   }
 
   openDialog(data: DialogData): void {
-    this.dialog.open(ConfirmComponent, {data: data});
+    this.dialog.open(ConfirmComponent, { data });
   }
 }

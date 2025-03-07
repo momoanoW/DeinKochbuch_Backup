@@ -43,9 +43,7 @@
         <div class="col">
           <mat-form-field hintLabel="Das selbe Passwort wie oben" class="full-width">
             <input matInput
-                   [class.ng-invalid]="differentPasswort()"
-                   [class.ng-valid]="!differentPasswort()"
-                   [type]="hide2 ? 'password' : 'text'" placeholder="Passwort wiederholen" formControlName="passwort2" autocomplete="new-password">
+                   [type]="hide2 ? 'passwort' : 'text'" placeholder="Passwort wiederholen" formControlName="passwort2" autocomplete="new-password">
             <button mat-icon-button matSuffix (click)="hide2 = !hide2" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide2">
               <mat-icon>{{hide2 ? 'visibility_off' : 'visibility'}}</mat-icon>
             </button>
@@ -56,8 +54,8 @@
             <mat-error *ngIf="registerForm.controls['passwort2'].hasError('minlength')">
               Passwort muss mind. <strong>8</strong> Zeichen enthalten!
             </mat-error>
-            <mat-error *ngIf="differentPasswort()">
-              Passwörter nicht identisch!
+            <mat-error *ngIf="registerForm.hasError('passwordsNotMatching')">
+              Passwörter stimmen nicht überein!
             </mat-error>
           </mat-form-field>
         </div>
@@ -66,7 +64,7 @@
     </mat-card-content>
     <!-- Registrieren Button -->
     <mat-card-actions>
-      <button mat-raised-button color="primary" type="submit" [disabled]="!registerForm.valid || differentPasswort()">Registrieren</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!registerForm.valid">Registrieren</button>
     </mat-card-actions>
   </mat-card>
 </form>
