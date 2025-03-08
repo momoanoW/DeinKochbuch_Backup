@@ -67,7 +67,9 @@
       <button mat-raised-button color="primary" type="submit" [disabled]="!registerForm.valid">Registrieren</button>
     </mat-card-actions>
   </mat-card>
-</form>
+    <button type="submit" mat-raised-button color="primary">Registrieren</button>
+    <button type="button" mat-button (click)="onCancelRegistration()">Abbrechen</button>
+  </form>
 
 <!-- Neue Zeilen für Fehlermeldungen und Erfolgsmeldungen -->
 <div *ngIf="registerMessage"

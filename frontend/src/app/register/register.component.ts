@@ -8,10 +8,10 @@ import { MatCardModule } from '@angular/material/card';
 import { User } from '../shared/user';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../shared/auth/auth.service';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ConfirmComponent } from '../shared/components/confirm/confirm.component';
 import { CommonModule } from '@angular/common';
 import { passwortMatchValidator } from '../shared/validators/passwort-match/passwort-match.validator'; // Import des Validators
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import { ConfirmComponent } from '../shared/components/confirm/confirm.component';
 
 export interface DialogData {
   headline: string;
@@ -119,8 +119,29 @@ export class RegisterComponent {
     }
   }
 
-
   openDialog(data: DialogData): void {
     this.dialog.open(ConfirmComponent, { data });
+  }
+
+
+  onCancelRegistration(): void {
+    const dialogRef = this.dialog.open(ConfirmComponent, {
+      data: {
+        title: 'Registrierung abbrechen',
+        message: 'Möchten Sie die Registrierung wirklich abbrechen? Alle Eingaben gehen verloren.',
+        confirmText: 'Ja, abbrechen',
+        cancelText: 'Nein, fortfahren'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Benutzer hat bestätigt, dass er abbrechen möchte
+        // NOCH IMPLEMENTIEREN: zur Startseite navigieren
+        this.registerForm.reset();
+        // oder: this.router.navigate(['/']);
+      }
+      // Wenn result false ist, bleibt der Benutzer auf der Registrierungsseite
+    });
   }
 }
