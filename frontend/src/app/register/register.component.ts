@@ -49,6 +49,8 @@ export class RegisterComponent {
   hide2 = true;
   user!: User;
 
+  registerMessage: string = '';
+
   constructor(
     private authService: AuthService,
     private dialog: MatDialog
@@ -56,28 +58,60 @@ export class RegisterComponent {
 
   onSubmit(): void {
     const values = this.registerForm.value;
-    this.user = {
-      name: values.name!,
-      passwort: values.passwort!,
-    };
-    console.log(this.user);
+    const name = values.name!;
+    const passwort = values.passwort!;
+    const passwort2 = values.passwort2!;
+
+    // Überprüfe zuerst die Passwortanforderungen
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(passwort)) {
+      this.registerMessage = 'Das Passwort entspricht nicht den Anforderungen. Es muss mindestens 8 Zeichen lang sein und mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Ziffer und ein Sonderzeichen enthalten.';
+      return;
+    }
+
     if (this.registerForm.valid) {
-      console.log('Eingaben gueltig! Registrierung wird vorgenommen');
-      this.authService.registerUser(this.user).subscribe({
+      this.authService.registerUser({ name, passwort }).subscribe({
         next: (response) => {
-          console.log('response', response);
-          this.openDialog({ headline: "Erfolg", info: "User " + response.name + " registriert!" });
+          console.log('Registrierung erfolgreich:', response);
+          this.registerMessage = 'Registrierung erfolgreich!';
         },
-        error: (err) => {
-          console.log('HttpErrorResponse : ', err);
-          this.openDialog({ headline: "Fehler", info: "Nutzername existiert bereits" });
-        },
-        complete: () => console.log('Registrierung abgeschlossen')
+        error: (error) => {
+          console.error('Registrierungsfehler:', error);
+          if (error.status === 0) {
+            this.registerMessage = 'Es konnte keine Verbindung zum Server hergestellt werden. Bitte überprüfen Sie Ihre Internetverbindung.';
+          } else if (error.status === 400) {
+            if (error.error?.message === 'Benutzername bereits vergeben') {
+              this.registerMessage = 'Dieser Benutzername ist bereits vergeben. Bitte wählen Sie einen anderen.';
+            } else {
+              this.registerMessage = error.error?.message || 'Ein Fehler ist bei der Registrierung aufgetreten.';
+            }
+          } else {
+            this.registerMessage = 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+          }
+        }
       });
     } else {
-      console.log('Eingaben ungueltig! Registrierung wird abgelehnt');
+      this.registerMessage = 'Bitte füllen Sie alle Felder korrekt aus.';
     }
+
+
+    if (passwort !== passwort2) {
+      this.registerMessage = 'Die Passwörter stimmen nicht überein.';
+      return;
+    }
+
+    if (name.length < 3) {
+      this.registerMessage = 'Der Benutzername muss mindestens 3 Zeichen lang sein.';
+      return;
+    }
+
+    if (!name || !passwort) {
+      this.registerMessage = 'Bitte füllen Sie alle Pflichtfelder aus.';
+      return;
+    }
+
   }
+
 
   openDialog(data: DialogData): void {
     this.dialog.open(ConfirmComponent, { data });
