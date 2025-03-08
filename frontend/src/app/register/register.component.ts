@@ -8,10 +8,10 @@ import { MatCardModule } from '@angular/material/card';
 import { User } from '../shared/user';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../shared/auth/auth.service';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ConfirmComponent } from './confirm/confirm.component';
 import { CommonModule } from '@angular/common';
 import { passwortMatchValidator } from '../shared/validators/passwort-match/passwort-match.validator'; // Import des Validators
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import { ConfirmComponent } from '../shared/components/confirm/confirm.component';
 
 export interface DialogData {
   headline: string;
@@ -49,6 +49,8 @@ export class RegisterComponent {
   hide2 = true;
   user!: User;
 
+  registerMessage: string = '';
+
   constructor(
     private authService: AuthService,
     private dialog: MatDialog
@@ -56,30 +58,90 @@ export class RegisterComponent {
 
   onSubmit(): void {
     const values = this.registerForm.value;
-    this.user = {
-      name: values.name!,
-      passwort: values.passwort!,
-    };
-    console.log(this.user);
+    const name = values.name!;
+    const passwort = values.passwort!;
+    const passwort2 = values.passwort2!;
+
+    // Überprüfe, ob die Passwörter übereinstimmen
+    if (passwort !== passwort2) {
+      this.registerMessage = 'Die Passwörter stimmen nicht überein.';
+      console.warn('Validierungsfehler: Die Passwörter stimmen nicht überein.');
+      return;
+    }
+
+    // Überprüfe, ob der Benutzername mindestens 3 Zeichen lang ist
+    if (name.length < 3) {
+      this.registerMessage = 'Der Benutzername muss mindestens 3 Zeichen lang sein.';
+      console.warn('Validierungsfehler: Der Benutzername ist zu kurz.');
+      return;
+    }
+
+    // Überprüfe, ob alle Pflichtfelder ausgefüllt sind
+    if (!name || !passwort) {
+      this.registerMessage = 'Bitte füllen Sie alle Pflichtfelder aus.';
+      console.warn('Validierungsfehler: Pflichtfelder sind nicht ausgefüllt.');
+      return;
+    }
+
+    // Überprüfe, ob das Passwort den Anforderungen entspricht
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(passwort)) {
+      this.registerMessage = 'Das Passwort entspricht nicht den Anforderungen. Es muss mindestens 8 Zeichen lang sein und mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Ziffer und ein Sonderzeichen enthalten.';
+      console.warn('Validierungsfehler: Das Passwort entspricht nicht den Anforderungen.');
+      return;
+    }
+
+    // Wenn das Formular gültig ist, sende die Registrierungsanfrage
     if (this.registerForm.valid) {
-      console.log('Eingaben gueltig! Registrierung wird vorgenommen');
-      this.authService.registerUser(this.user).subscribe({
+      this.authService.registerUser({ name, passwort }).subscribe({
         next: (response) => {
-          console.log('response', response);
-          this.openDialog({ headline: "Erfolg", info: "User " + response.name + " registriert!" });
+          console.log('Registrierung erfolgreich:', response);
+          this.registerMessage = 'Registrierung erfolgreich!';
         },
-        error: (err) => {
-          console.log('HttpErrorResponse : ', err);
-          this.openDialog({ headline: "Fehler", info: "Nutzername existiert bereits" });
-        },
-        complete: () => console.log('Registrierung abgeschlossen')
+        error: (error) => {
+          console.error('Registrierungsfehler:', error);
+          if (error.status === 0) {
+            this.registerMessage = 'Es konnte keine Verbindung zum Server hergestellt werden. Bitte überprüfen Sie Ihre Internetverbindung.';
+          } else if (error.status === 400) {
+            if (error.error?.message === 'Benutzername bereits vergeben') {
+              this.registerMessage = 'Dieser Benutzername ist bereits vergeben. Bitte wählen Sie einen anderen.';
+            } else {
+              this.registerMessage = error.error?.message || 'Ein Fehler ist bei der Registrierung aufgetreten.';
+            }
+          } else {
+            this.registerMessage = 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+          }
+        }
       });
     } else {
-      console.log('Eingaben ungueltig! Registrierung wird abgelehnt');
+      console.warn('Formular ungültig:', this.registerForm.errors);
+      this.registerMessage = 'Bitte füllen Sie alle Felder korrekt aus.';
     }
   }
 
   openDialog(data: DialogData): void {
     this.dialog.open(ConfirmComponent, { data });
+  }
+
+
+  onCancelRegistration(): void {
+    const dialogRef = this.dialog.open(ConfirmComponent, {
+      data: {
+        title: 'Registrierung abbrechen',
+        message: 'Möchten Sie die Registrierung wirklich abbrechen? Alle Eingaben gehen verloren.',
+        confirmText: 'Ja, abbrechen',
+        cancelText: 'Nein, fortfahren'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Benutzer hat bestätigt, dass er abbrechen möchte
+        // NOCH IMPLEMENTIEREN: zur Startseite navigieren
+        this.registerForm.reset();
+        // oder: this.router.navigate(['/']);
+      }
+      // Wenn result false ist, bleibt der Benutzer auf der Registrierungsseite
+    });
   }
 }

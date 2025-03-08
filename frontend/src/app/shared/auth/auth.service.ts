@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, Injectable, Signal, signal, WritableSignal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { User } from '../user';
 
 @Injectable({
@@ -25,9 +26,14 @@ export class AuthService {
   }
 
   registerUser(user: User): Observable<any> {
-    // Sende nur name und passwort an das Backend
     const { name, passwort } = user;
-    return this.http.post(this.baseUrl + '/users/neu', { name, passwort });
+    return this.http.post(this.baseUrl + '/users/neu', { name, passwort }).pipe(
+      tap(response => console.log('Registrierung erfolgreich')),
+      catchError(error => {
+        console.error('Registrierungsfehler:', error.status, error.statusText);
+        return throwError(() => new Error('Registrierung fehlgeschlagen'));
+      })
+    );
   }
 
   loginUser(user: { name: string; passwort: string }): Observable<any> {

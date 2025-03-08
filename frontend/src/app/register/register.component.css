@@ -26,3 +26,15 @@
 .col:last-child {
   margin-right: 0;
 }
+
+.success {
+  color: green;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.error {
+  color: red;
+  padding: 10px;
+  margin-top: 10px;
+}
