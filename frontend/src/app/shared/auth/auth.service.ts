@@ -27,10 +27,10 @@ export class AuthService {
   registerUser(user: User): Observable<any> {
     // Sende nur name und passwort an das Backend
     const { name, passwort } = user;
-    return this.http.post(this.baseUrl + '/user/register', { name, passwort });
+    return this.http.post(this.baseUrl + '/users/neu', { name, passwort });
   }
 
   loginUser(user: { name: string; passwort: string }): Observable<any> {
-    return this.http.post(this.baseUrl + '/user/login', user);
+    return this.http.post(this.baseUrl + '/users/login', user);
   }
 }
