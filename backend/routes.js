@@ -6,13 +6,28 @@ const client = require('./db');
 router.post('/users/login', async (req, res) => {
     const { name, passwort } = req.body;
     try {
-        const userQuery = 'SELECT * FROM users WHERE name = $1 AND passwort = $2';
-        const result = await client.query(userQuery, [name, passwort]);
-        if (result.rows.length === 0) {
-            return res.status(401).json({ message: 'Ungültige Anmeldeinformationen' });
+        // Überprüfen, ob der Benutzer existiert
+        const userQuery = 'SELECT * FROM users WHERE name = $1';
+        const userResult = await client.query(userQuery, [name]);
+
+        if (userResult.rows.length === 0) {
+            // Benutzername existiert nicht
+            return res.status(401).json({ message: 'Ungültige Anmeldedaten' });
         }
-        const user = result.rows[0];
-        res.json({message: 'Login erfolgreich',userId: user.id,name: user.name});
+
+        // Überprüfen, ob das Passwort korrekt ist
+        const user = userResult.rows[0];
+        if (user.passwort !== passwort) {
+            // Falsches Passwort
+            return res.status(401).json({ message: 'Ungültige Anmeldedaten' });
+        }
+
+        // Login erfolgreich
+        res.json({
+            message: 'Login erfolgreich',
+            userId: user.id,
+            name: user.name,
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Serverfehler beim Login' });
