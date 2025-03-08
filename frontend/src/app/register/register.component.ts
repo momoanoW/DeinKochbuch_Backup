@@ -9,7 +9,7 @@ import { User } from '../shared/user';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../shared/auth/auth.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ConfirmComponent } from './confirm/confirm.component';
+import { ConfirmComponent } from '../shared/components/confirm/confirm.component';
 import { CommonModule } from '@angular/common';
 import { passwortMatchValidator } from '../shared/validators/passwort-match/passwort-match.validator'; // Import des Validators
 
