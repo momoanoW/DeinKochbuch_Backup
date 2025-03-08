@@ -1,12 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { AuthService } from '../shared/auth/auth.service';
+import { CommonModule } from '@angular/common';
+import { LoginComponent } from '../login/login.component';
 
 @Component({
   selector: 'app-home',
-  standalone: true,
-  imports: [],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+  styleUrls: ['./home.component.css'],
+  standalone: true,
+  imports: [LoginComponent, CommonModule]
 })
 export class HomeComponent {
+  private authService = inject(AuthService);
 
+  loggedIn = this.authService.loggedIn;
 }

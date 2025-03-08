@@ -8,8 +8,25 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    mat-icon {
+      font-family: 'Material Icons' !important;
+    }
+  </style>
 </head>
 <body class="mat-typography">
-  <app-root></app-root>
+<div id="preloader" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: #fff; z-index: 9999;">
+  Laden...
+</div>
+<style>
+  body { visibility: hidden; }
+</style>
+<app-root></app-root>
 </body>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.body.style.visibility = 'visible';
+  });
+</script>
+
 </html>

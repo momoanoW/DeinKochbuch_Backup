@@ -6,7 +6,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../shared/auth/auth.service';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -35,6 +35,7 @@ export class LoginComponent {
   loginMessage: string = '';
 
   private auth = inject(AuthService);
+  private router = inject(Router);
 
   togglePasswordVisibility(event: Event) {
     event.preventDefault();
@@ -47,23 +48,23 @@ export class LoginComponent {
     const name = values.name!;
     const passwort = values.passwort!;
 
-    const user = {name: name, passwort: passwort}
-    console.log('user', user)
+    const user = { name, passwort };
+    console.log('user', user);
+
     if (this.loginForm.valid) {
       this.auth.loginUser(user).subscribe({
-        next: (response) => {
-          console.log('user logged in ', response);
-          this.auth.setUser(response.token, response.user);
-          this.loginMessage = 'Login erfolgreich'; // Setze die Erfolgsmeldung
+        next: () => {
+          console.log('user logged in');
+          this.loginMessage = 'Login erfolgreich';
+          this.router.navigate(['/']);
         },
         error: (err) => {
           console.log('login error', err);
-          this.loginMessage = 'Login fehlgeschlagen: ' + (err.error?.message || 'Unbekannter Fehler'); // Setze die Fehlermeldung
+          this.loginMessage = err.message; // Fehlermeldung anzeigen
         },
         complete: () => console.log('login completed')
       });
     } else {
-      console.log('Form is invalid');
       this.loginMessage = 'Bitte füllen Sie alle Felder korrekt aus.';
     }
   }

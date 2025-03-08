@@ -1,5 +1,9 @@
-<main class="d-flex align-items-center min-vh-100">
-  <div class="container text-center">
-    Welcome home!
-  </div>
-</main>
+<div *ngIf="loggedIn(); else loginForm">
+  <h1>Willkommen bei Mein Kochbuch.de</h1>
+  <button mat-raised-button color="primary" routerLink="/newrecipe">Neues Rezept hochladen</button>
+</div>
+
+<ng-template #loginForm>
+  <p>Bitte loggen Sie sich zuerst ein!</p>
+  <app-login></app-login>
+</ng-template>
