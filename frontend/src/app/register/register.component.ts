@@ -62,13 +62,36 @@ export class RegisterComponent {
     const passwort = values.passwort!;
     const passwort2 = values.passwort2!;
 
-    // Überprüfe zuerst die Passwortanforderungen
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(passwort)) {
-      this.registerMessage = 'Das Passwort entspricht nicht den Anforderungen. Es muss mindestens 8 Zeichen lang sein und mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Ziffer und ein Sonderzeichen enthalten.';
+    // Überprüfe, ob die Passwörter übereinstimmen
+    if (passwort !== passwort2) {
+      this.registerMessage = 'Die Passwörter stimmen nicht überein.';
+      console.warn('Validierungsfehler: Die Passwörter stimmen nicht überein.');
       return;
     }
 
+    // Überprüfe, ob der Benutzername mindestens 3 Zeichen lang ist
+    if (name.length < 3) {
+      this.registerMessage = 'Der Benutzername muss mindestens 3 Zeichen lang sein.';
+      console.warn('Validierungsfehler: Der Benutzername ist zu kurz.');
+      return;
+    }
+
+    // Überprüfe, ob alle Pflichtfelder ausgefüllt sind
+    if (!name || !passwort) {
+      this.registerMessage = 'Bitte füllen Sie alle Pflichtfelder aus.';
+      console.warn('Validierungsfehler: Pflichtfelder sind nicht ausgefüllt.');
+      return;
+    }
+
+    // Überprüfe, ob das Passwort den Anforderungen entspricht
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(passwort)) {
+      this.registerMessage = 'Das Passwort entspricht nicht den Anforderungen. Es muss mindestens 8 Zeichen lang sein und mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Ziffer und ein Sonderzeichen enthalten.';
+      console.warn('Validierungsfehler: Das Passwort entspricht nicht den Anforderungen.');
+      return;
+    }
+
+    // Wenn das Formular gültig ist, sende die Registrierungsanfrage
     if (this.registerForm.valid) {
       this.authService.registerUser({ name, passwort }).subscribe({
         next: (response) => {
@@ -91,25 +114,9 @@ export class RegisterComponent {
         }
       });
     } else {
+      console.warn('Formular ungültig:', this.registerForm.errors);
       this.registerMessage = 'Bitte füllen Sie alle Felder korrekt aus.';
     }
-
-
-    if (passwort !== passwort2) {
-      this.registerMessage = 'Die Passwörter stimmen nicht überein.';
-      return;
-    }
-
-    if (name.length < 3) {
-      this.registerMessage = 'Der Benutzername muss mindestens 3 Zeichen lang sein.';
-      return;
-    }
-
-    if (!name || !passwort) {
-      this.registerMessage = 'Bitte füllen Sie alle Pflichtfelder aus.';
-      return;
-    }
-
   }
 
 
