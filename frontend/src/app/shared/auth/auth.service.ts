@@ -9,7 +9,7 @@ import { User } from '../user';
 })
 export class AuthService {
   private baseUrl = 'http://localhost:3000';
-  user: WritableSignal<User> = signal({id: 0, name: '', passwort: ''});
+  user: WritableSignal<User> = signal({ id: 0, name: '', passwort: '' });
   token: WritableSignal<string> = signal('');
   loggedIn: Signal<boolean> = computed(() => this.user().id && this.user().id! > 0 || false);
 
@@ -21,7 +21,7 @@ export class AuthService {
   }
 
   unsetUser(): void {
-    this.user.set({id: 0, name: '', passwort: ''});
+    this.user.set({ id: 0, name: '', passwort: '' });
     this.token.set('');
   }
 
@@ -37,6 +37,21 @@ export class AuthService {
   }
 
   loginUser(user: { name: string; passwort: string }): Observable<any> {
-    return this.http.post(this.baseUrl + '/users/login', user);
+    return this.http.post(this.baseUrl + '/users/login', user).pipe(
+      tap((response: any) => {
+        // Nach erfolgreichem Login den Benutzer und das Token setzen
+        this.setUser(response.token, response.user);
+      }),
+      catchError(error => {
+        console.error('Login-Fehler:', error.status, error.statusText);
+        return throwError(() => new Error('Login fehlgeschlagen'));
+      })
+    );
+  }
+
+  logout(): void {
+    // Setze den Benutzer und das Token zurück
+    this.unsetUser();
+    console.log('Logout erfolgreich');
   }
 }

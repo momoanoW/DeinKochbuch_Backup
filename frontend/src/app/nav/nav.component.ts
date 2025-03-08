@@ -1,14 +1,9 @@
 import { Component, inject } from '@angular/core';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AsyncPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet, Router } from '@angular/router';
+import { AuthService } from '../shared/auth/auth.service';
 
 @Component({
   selector: 'app-nav',
@@ -16,22 +11,36 @@ import { RouterLink, RouterOutlet } from '@angular/router';
   styleUrl: './nav.component.css',
   standalone: true,
   imports: [
+    CommonModule,
     MatToolbarModule,
     MatButtonModule,
-    MatSidenavModule,
-    MatListModule,
-    MatIconModule,
-    AsyncPipe,
+    RouterLink,
     RouterOutlet,
-    RouterLink
-  ]
+  ],
 })
 export class NavComponent {
-  private breakpointObserver = inject(BreakpointObserver);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
-    .pipe(
-      map(result => result.matches),
-      shareReplay()
-    );
+  user = this.authService.user;
+
+  isHomePage(): boolean {
+    return this.router.url === '/';
+  }
+
+  showNewRecipeButton(): boolean {
+    return this.router.url === '/';
+  }
+
+  async logout() {
+    this.authService.logout();
+    try {
+      const success = await this.router.navigate(['/login']);
+      if (!success) {
+        console.error('Navigation to /login failed');
+      }
+    } catch (error) {
+      console.error('Error during navigation:', error);
+    }
+  }
 }
