@@ -26,8 +26,8 @@ export class HeaderComponent {
   loggedIn = this.authService.loggedIn;
 
   async logout() {
-    await this.authService.logout();
-    this.router.navigate(['/']);
+    this.authService.logout();
+    await this.router.navigate(['/']);
   }
 
 

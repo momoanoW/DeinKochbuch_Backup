@@ -1,1 +1,68 @@
-<p>newrecipe works!</p>
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Neues Rezept erstellen</h2>
+
+  <form (ngSubmit)="onSubmit()" #rezeptForm="ngForm">
+    <div class="mb-3">
+      <label for="name" class="form-label">Rezeptname</label>
+      <input type="text" id="name" class="form-control" required [(ngModel)]="rezept.name" name="name">
+    </div>
+
+    <div class="mb-3">
+      <label for="anleitung" class="form-label">Anleitung</label>
+      <textarea id="anleitung" class="form-control" required [(ngModel)]="rezept.anleitung" name="anleitung"></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="anzahlportionen" class="form-label">Anzahl der Portionen</label>
+      <input type="number" id="anzahlportionen" class="form-control" required [(ngModel)]="rezept.anzahlportionen" name="anzahlportionen">
+    </div>
+
+    <div class="mb-3">
+      <label for="zubereitungszeitmin" class="form-label">Zubereitungszeit (in Minuten)</label>
+      <input type="number" id="zubereitungszeitmin" class="form-control" required [(ngModel)]="rezept.zubereitungszeitmin" name="zubereitungszeitmin">
+    </div>
+
+    <!-- Checkboxen -->
+    <div class="mb-3">
+      <label class="form-label">Eigenschaften</label>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="rohkost" [(ngModel)]="rezept.rohkost" name="rohkost">
+        <label class="form-check-label" for="rohkost">Rohkost</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="vegan" [(ngModel)]="rezept.vegan" name="vegan">
+        <label class="form-check-label" for="vegan">Vegan</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="vegetarisch" [(ngModel)]="rezept.vegetarisch" name="vegetarisch">
+        <label class="form-check-label" for="vegetarisch">Vegetarisch</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="glutenfrei" [(ngModel)]="rezept.glutenfrei" name="glutenfrei">
+        <label class="form-check-label" for="glutenfrei">Glutenfrei</label>
+      </div>
+    </div>
+
+    <!-- Zutaten hinzufügen -->
+    <div class="mb-3">
+      <label for="zutaten" class="form-label">Zutaten</label>
+      <input type="text" id="zutaten" class="form-control" placeholder="Zutat eingeben..." (input)="sucheZutat($event)">
+
+      <!-- Autocomplete-Vorschläge -->
+      <div *ngIf="zutatenVorschlaege.length > 0" class="list-group">
+        <button type="button" class="list-group-item list-group-item-action" *ngFor="let z of zutatenVorschlaege" (click)="zutatHinzufuegen(z, 100)">
+          {{ z.name }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Liste der hinzugefügten Zutaten -->
+    <ul class="list-group mb-3">
+      <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let z of ausgewaehlteZutaten">
+        {{ z.name }} ({{ z.menge }} g/ml)
+      </li>
+    </ul>
+
+    <button type="submit" class="btn btn-primary w-100">Rezept speichern</button>
+  </form>
+</div>

@@ -20,7 +20,7 @@
       </div>
       <div class="row">
         <div class="col">
-          <mat-form-field hintLabel="Mind. 8 Zeichen, mind. 1 Groß- und Kleinbuchstaben, Ziffer und Sonderzeichen" class="full-width">
+          <mat-form-field hintLabel="Mind. 8 Zeichen, mind. 1 Groß- und Kleinbuchstabe, Ziffer und Sonderzeichen" class="full-width">
             <input matInput [type]="hide ? 'password' : 'text'" placeholder="Passwort" formControlName="passwort">
             <button type="button" mat-icon-button matSuffix (click)="togglePasswordVisibility($event)" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
               <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
